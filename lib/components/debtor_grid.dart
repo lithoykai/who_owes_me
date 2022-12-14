@@ -33,7 +33,7 @@ class _DebtorGridState extends State<DebtorGrid> {
       return Provider.of<DebtorList>(context, listen: false).refreshDebtors();
     }
 
-    final List<Debtor> debtorList = debtor.items;
+    var debtorList = debtor.items;
 
     return RefreshIndicator(
       onRefresh: () => _refreshDebtors(context),

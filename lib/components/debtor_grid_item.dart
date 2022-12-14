@@ -27,16 +27,16 @@ class _DebtorGridItemState extends State<DebtorGridItem> {
       subtitle: Text('${debtor.number} - R\$ ${debtor.valueMouth}'),
       trailing: Column(
         children: [
-          // Text('Pagamento:'),
-          // Text(
-          //   DateFormat('dd/MM/yyyy').format(debtor.datePay),
-          // ),
-          TextButton(
-            onPressed: () {
-              Provider.of<DebtorList>(context, listen: false).refreshDebtors();
-            },
-            child: Text('Teste.'),
-          )
+          Text('Pagamento:'),
+          Text(
+            DateFormat('dd/MM/yyyy').format(debtor.datePay),
+          ),
+          // TextButton(
+          //   onPressed: () {
+          //     Provider.of<DebtorList>(context, listen: false).refreshDebtors();
+          //   },
+          //   child: Text('Teste.'),
+          // )
         ],
       ),
     );

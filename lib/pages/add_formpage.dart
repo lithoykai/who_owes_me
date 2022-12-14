@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:who_owes_me/model/debtor_list.dart';
-
 import '../components/adaptative_date_picker.dart';
 import '../model/debtor.dart';
 
@@ -13,65 +12,63 @@ class Add_Form_Page extends StatefulWidget {
 }
 
 class _Add_Form_PageState extends State<Add_Form_Page> {
+  final _formData = Map<String, Object>();
+  final _formKey = GlobalKey<FormState>();
+  DateTime _selectedDate = DateTime.now();
+  final myController = TextEditingController();
+  //FocusNode
+  final _nameFocus = FocusNode();
+  final _valuePayFocus = FocusNode();
+  final _dataFocus = FocusNode();
+  final _phoneNumberFocus = FocusNode();
+
+  @override
+  void dispose() {
+    _nameFocus.dispose();
+    _valuePayFocus.dispose();
+    _dataFocus.dispose();
+    _phoneNumberFocus.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_formData.isEmpty) {
+      final arg = ModalRoute.of(context)?.settings.arguments;
+
+      if (arg != null) {
+        final debtor = arg as Debtor;
+        _formData['name'] = debtor.name;
+        _formData['valuePay'] = debtor.valueMouth;
+        _formData['phoneNumber'] = debtor.number;
+        _formData['data'] = debtor.datePay;
+      }
+    }
+  }
+
+  void _submitForm() {
+    final isValid = _formKey.currentState?.validate() ?? false;
+
+    if (!isValid) {
+      return;
+    }
+    _formKey.currentState?.save();
+
+    _formData['dataPay'] = _selectedDate;
+    Provider.of<DebtorList>(
+      context,
+      listen: false,
+    ).saveData(_formData, _selectedDate);
+
+    Navigator.of(context).pop();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final _formData = Map<String, Object>();
-    final _formKey = GlobalKey<FormState>();
-    DateTime _selectedDate = DateTime.now();
-
-    final _name = FocusNode();
-    final _valuePay = FocusNode();
-    final _data = FocusNode();
-    final _phoneNumber = FocusNode();
-
-    @override
-    void dispose() {
-      super.dispose();
-      _name.dispose();
-      _valuePay.dispose();
-
-      _data.dispose();
-      _phoneNumber.dispose();
-    }
-
-    @override
-    void didChangeDependencies() {
-      super.didChangeDependencies();
-
-      if (_formData.isEmpty) {
-        final arg = ModalRoute.of(context)?.settings.arguments;
-
-        if (arg != null) {
-          final debtor = arg as Debtor;
-          _formData['name'] = debtor.name;
-          _formData['valuePay'] = debtor.valueMouth;
-          _formData['phoneNumber'] = debtor.number;
-          _formData['data'] = debtor.datePay;
-        }
-      }
-    }
-
-    void _submitForm() {
-      final isValid = _formKey.currentState?.validate() ?? false;
-
-      if (!isValid) {
-        return;
-      }
-      _formKey.currentState?.save();
-
-      print('SUBMITFORM TESTE= OK');
-
-      Provider.of<DebtorList>(
-        context,
-        listen: false,
-      ).saveData(_formData, _selectedDate);
-
-      Navigator.of(context).pop();
-    }
-
     return Scaffold(
       appBar: AppBar(
-        title: Text('Adicionar devedor.'),
+        title: const Text('Adicionar devedor.'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(15.0),
@@ -81,11 +78,11 @@ class _Add_Form_PageState extends State<Add_Form_Page> {
             children: [
               TextFormField(
                 initialValue: _formData['name']?.toString(),
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Nome',
                 ),
                 // onFieldSubmitted: (_) {
-                //   FocusScope.of(context).requestFocus(_priceFocus);
+                //   FocusScope.of(context).requestFocus(_nameFocus);
                 // },
                 textInputAction: TextInputAction.next,
                 onSaved: (name) => _formData['name'] = name ?? '',
@@ -100,19 +97,16 @@ class _Add_Form_PageState extends State<Add_Form_Page> {
                   }
                 },
               ),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               TextFormField(
                 initialValue: _formData['name']?.toString(),
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Telefone',
                 ),
-                // onFieldSubmitted: (_) {
-                //   FocusScope.of(context).requestFocus(_priceFocus);
-                // },
                 textInputAction: TextInputAction.next,
-                keyboardType: TextInputType.numberWithOptions(),
+                keyboardType: const TextInputType.numberWithOptions(),
                 onSaved: (phoneNumber) =>
                     _formData['phoneNumber'] = phoneNumber ?? '',
                 validator: (_phoneNumber) {
@@ -126,36 +120,36 @@ class _Add_Form_PageState extends State<Add_Form_Page> {
                   }
                 },
               ),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               TextFormField(
                 initialValue: _formData['valuePay']?.toString(),
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Valor',
                 ),
-                // onFieldSubmitted: (_) {
-                //   FocusScope.of(context).requestFocus(_priceFocus);
-                // },
                 textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.numberWithOptions(),
-                onSaved: (valuePay) => _formData['valuePay'] = valuePay ?? 0.0,
+                onChanged: (valuePay) =>
+                    _formData['valuePay'] = valuePay ?? 0.0,
                 validator: (_valuePay) {
                   final valuePay = double.tryParse(_valuePay.toString()) ?? 0.0;
                 },
               ),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               AdaptativeDatePicker(
                 selectedDate: _selectedDate,
                 onChangeDate: (newDate) {
-                  _selectedDate = newDate;
+                  setState(() {
+                    _selectedDate = newDate;
+                  });
                 },
               ),
               TextButton(
                 onPressed: _submitForm,
-                child: Text('Salvar222.'),
+                child: Text('Salvar.'),
               )
             ],
           ),
