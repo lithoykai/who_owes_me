@@ -24,7 +24,7 @@ class _DebtorGridItemState extends State<DebtorGridItem> {
       ),
       tileColor: debtor.paymentColor!,
       title: Text(debtor.name),
-      subtitle: Text('${debtor.number} - R\$ ${debtor.valueMouth}'),
+      subtitle: Text('${debtor.number} - R\$ ${debtor.valuePay}'),
       trailing: Column(
         children: [
           Text('Pagamento:'),

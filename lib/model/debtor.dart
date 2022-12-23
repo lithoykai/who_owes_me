@@ -3,17 +3,15 @@ import 'package:flutter/material.dart';
 class Debtor with ChangeNotifier {
   String name;
   String number;
-  String valueMouth;
-  DateTime dateNow;
+  String valuePay;
   DateTime datePay;
   Payment? payment;
 
   Debtor({
     this.payment,
-    required this.valueMouth,
+    required this.valuePay,
     required this.name,
     required this.number,
-    required this.dateNow,
     required this.datePay,
   });
 
@@ -22,7 +20,7 @@ class Debtor with ChangeNotifier {
       case Payment.ok:
         return Colors.white;
       case Payment.atrasado:
-        return Color.fromARGB(118, 229, 115, 115);
+        return const Color.fromARGB(118, 229, 115, 115);
       default:
         return Colors.white;
     }

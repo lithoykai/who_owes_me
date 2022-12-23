@@ -16,33 +16,21 @@ class _DebtorGridState extends State<DebtorGrid> {
   @override
   Widget build(BuildContext context) {
     @override
-    void initState() {
-      Provider.of<DebtorList>(context, listen: false).refreshDebtors;
-    }
-
-    @override
-    void didUpdateWidget(oldWidget) {
-      super.didUpdateWidget(oldWidget);
-      if (widget != oldWidget) {
-        Provider.of<DebtorList>(context, listen: false).dispose();
-      }
-    }
-
     final debtor = Provider.of<DebtorList>(context);
-    Future<void> _refreshDebtors(BuildContext context) {
-      return Provider.of<DebtorList>(context, listen: false).refreshDebtors();
+    Future<void> _checkDebtorPayments(BuildContext context) {
+      return Provider.of<DebtorList>(context, listen: false)
+          .checkDebtorPayments();
     }
 
     var debtorList = debtor.items;
 
     return RefreshIndicator(
-      onRefresh: () => _refreshDebtors(context),
+      onRefresh: () => _checkDebtorPayments(context),
       child: ListView.builder(
         itemBuilder: (ctx, i) => ChangeNotifierProvider.value(
           value: debtorList[i],
           child: DebtorGridItem(),
         ),
-        // DebtorGridItem(debtor.items[i]),
         itemCount: debtor.itemsCount,
       ),
     );

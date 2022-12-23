@@ -40,7 +40,7 @@ class _Add_Form_PageState extends State<Add_Form_Page> {
       if (arg != null) {
         final debtor = arg as Debtor;
         _formData['name'] = debtor.name;
-        _formData['valuePay'] = debtor.valueMouth;
+        _formData['valuePay'] = debtor.valuePay;
         _formData['phoneNumber'] = debtor.number;
         _formData['data'] = debtor.datePay;
       }
@@ -55,7 +55,8 @@ class _Add_Form_PageState extends State<Add_Form_Page> {
     }
     _formKey.currentState?.save();
 
-    _formData['dataPay'] = _selectedDate;
+    _formData['datePay'] = _selectedDate;
+
     Provider.of<DebtorList>(
       context,
       listen: false,
@@ -85,6 +86,7 @@ class _Add_Form_PageState extends State<Add_Form_Page> {
                 //   FocusScope.of(context).requestFocus(_nameFocus);
                 // },
                 textInputAction: TextInputAction.next,
+                // onSaved: (name) => name ?? '',
                 onSaved: (name) => _formData['name'] = name ?? '',
                 validator: (_name) {
                   final name = _name ?? '';
@@ -107,6 +109,7 @@ class _Add_Form_PageState extends State<Add_Form_Page> {
                 ),
                 textInputAction: TextInputAction.next,
                 keyboardType: const TextInputType.numberWithOptions(),
+                // onSaved: (phoneNumber) => debtorValue?.number,
                 onSaved: (phoneNumber) =>
                     _formData['phoneNumber'] = phoneNumber ?? '',
                 validator: (_phoneNumber) {
@@ -130,11 +133,8 @@ class _Add_Form_PageState extends State<Add_Form_Page> {
                 ),
                 textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.numberWithOptions(),
-                onChanged: (valuePay) =>
-                    _formData['valuePay'] = valuePay ?? 0.0,
-                validator: (_valuePay) {
-                  final valuePay = double.tryParse(_valuePay.toString()) ?? 0.0;
-                },
+                // onSaved: (valuePay) => debtorValue?.valueMouth,
+                onSaved: (valuePay) => _formData['valuePay'] = valuePay ?? '',
               ),
               const SizedBox(
                 height: 10,

@@ -15,12 +15,50 @@ class DebtorList with ChangeNotifier {
     return _items.length;
   }
 
+  Future<void> checkDebtorPayments() async {
+    final response = await http.get(Uri.parse('${Constants.DEBTOR_URL}.json'));
+    if (response.body == 'null') return;
+
+    Map<String, dynamic> data = jsonDecode(response.body);
+    data.forEach((id, debtorData) {
+      DateTime datePay = DateTime.parse(debtorData['datePay']);
+      if (DateTime.now().compareTo(datePay) == 1) {
+        http.patch(Uri.parse('${Constants.DEBTOR_URL}/$id.json'),
+            body: jsonEncode({"payment": 1}));
+      }
+    });
+  }
+
+  Future<void> listDebtors() async {
+    _items.clear();
+
+    final response = await http.get(Uri.parse('${Constants.DEBTOR_URL}.json'));
+    if (response.body == 'null') return;
+    Map<String, dynamic> data = jsonDecode(response.body);
+    checkDebtorPayments();
+
+    data.forEach((id, debtorData) {
+      _items.add(
+        Debtor(
+            payment: Payment.values.elementAt(debtorData['payment']),
+            valuePay: debtorData['valuePay'],
+            name: debtorData['name'],
+            number: debtorData['number'],
+            datePay: DateTime.parse(debtorData['datePay'])),
+      );
+    });
+
+    notifyListeners();
+  }
+
   Future<void> refreshDebtors() async {
     print(items.map((e) {
-      if (e.dateNow.compareTo(e.datePay) == 1) {
+      print(DateTime.now().compareTo(e.datePay));
+      if (DateTime.now().compareTo(e.datePay) == 1) {
         e.payment = Payment.atrasado;
-      } else if (e.dateNow.compareTo(e.datePay) == -1) {
-        return;
+      } else if (DateTime.now().compareTo(e.datePay) == 0) {
+        e.payment = Payment.ok;
+        ;
       } else {
         return;
       }
@@ -28,39 +66,48 @@ class DebtorList with ChangeNotifier {
     notifyListeners();
   }
 
-  void saveData(Map<String, Object> data, DateTime dataPay) {
-    print(data['dataPay']);
+  void saveData(Map<String, Object> data, DateTime datePay) {
+    print(data['valuePay']);
 
     Payment payment = Payment.ok;
-    if (DateTime.now().compareTo(data['dataPay'] as DateTime) == -1) {
+    if (DateTime.now().compareTo(data['datePay'] as DateTime) == -1) {
       payment = Payment.ok;
-    } else if (DateTime.now().compareTo(data['dataPay'] as DateTime) == 1) {
+    } else if (DateTime.now().compareTo(data['datePay'] as DateTime) == 1) {
       payment = Payment.atrasado;
     }
-    print(payment);
 
     final debtor = Debtor(
-      valueMouth: data['valuePay'] as String,
+      valuePay: data['valuePay'] as String,
       name: data['name'] as String,
       number: data['phoneNumber'] as String,
-      dateNow: DateTime.now(),
-      datePay: dataPay,
+      datePay: datePay,
       payment: payment,
     );
-
+    // listDebtors();
     addData(debtor);
   }
 
+  Payment checkPayment(debtor) {
+    Payment payment = Payment.ok;
+    if (DateTime.now().compareTo(debtor.datePay as DateTime) == -1) {
+      return payment = Payment.ok;
+    } else if (DateTime.now().compareTo(debtor.datePay as DateTime) == 1) {
+      return payment = Payment.atrasado;
+    }
+    return payment;
+  }
+
   Future<void> addData(Debtor debtor) async {
+    Payment payment = checkPayment(debtor);
     final response = await http.post(
       Uri.parse('${Constants.DEBTOR_URL}.json'),
       body: jsonEncode(
         {
           "name": debtor.name,
-          "valuePay": debtor.valueMouth,
+          "valuePay": debtor.valuePay,
           "number": debtor.number,
-          "dataPay": debtor.datePay.toIso8601String(),
-          "dataAdd": DateTime.now().toIso8601String(),
+          "datePay": debtor.datePay.toIso8601String(),
+          "dateAdd": DateTime.now().toIso8601String(),
           "payment": debtor.payment!.index,
         },
       ),
@@ -68,14 +115,12 @@ class DebtorList with ChangeNotifier {
 
     _items.add(
       Debtor(
-        valueMouth: debtor.valueMouth,
+        valuePay: debtor.valuePay,
         name: debtor.name,
         number: debtor.number,
-        dateNow: debtor.dateNow,
         datePay: debtor.datePay,
       ),
     );
-    refreshDebtors();
     notifyListeners();
   }
 }

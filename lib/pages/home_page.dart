@@ -13,7 +13,18 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  bool _isLoading = false;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    Provider.of<DebtorList>(
+      context,
+      listen: false,
+    ).listDebtors().then((value) => setState(
+          () => _isLoading = false,
+        ));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +35,7 @@ class _HomePageState extends State<HomePage> {
       body: DebtorGrid(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+          // Provider.of<DebtorList>(context, listen: false).listDebtors();
           Navigator.of(context).pushNamed(AppRouters.ADD_FORM_PAGE);
         },
         child: const Icon(Icons.add),
