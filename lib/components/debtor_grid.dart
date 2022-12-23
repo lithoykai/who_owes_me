@@ -3,8 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:who_owes_me/components/debtor_grid_item.dart';
 import 'package:who_owes_me/model/debtor_list.dart';
 
-import '../model/debtor.dart';
-
 class DebtorGrid extends StatefulWidget {
   const DebtorGrid({Key? key}) : super(key: key);
 

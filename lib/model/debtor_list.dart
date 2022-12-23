@@ -1,13 +1,13 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
-import 'package:who_owes_me/data/dummy_data.dart';
 import 'package:who_owes_me/utils/constants.dart';
 import 'debtor.dart';
 
 class DebtorList with ChangeNotifier {
-  List<Debtor> _items = dummy_Data;
+  List<Debtor> _items = [];
 
   List<Debtor> get items => [..._items];
 
@@ -25,8 +25,31 @@ class DebtorList with ChangeNotifier {
       if (DateTime.now().compareTo(datePay) == 1) {
         http.patch(Uri.parse('${Constants.DEBTOR_URL}/$id.json'),
             body: jsonEncode({"payment": 1}));
+      } else if (DateTime.now().compareTo(datePay) == -1) {
+        http.patch(Uri.parse('${Constants.DEBTOR_URL}/$id.json'),
+            body: jsonEncode({"payment": 0}));
       }
     });
+  }
+
+  Future<void> paymentDone(Debtor debtor) async {
+    final response = await http.get(Uri.parse('${Constants.DEBTOR_URL}.json'));
+    if (response.body == 'null') return;
+    Map<String, dynamic> data = jsonDecode(response.body);
+
+    int index = _items.indexWhere((p) => p.id == debtor.id);
+
+    if (index >= 0) {
+      await http.patch(
+        Uri.parse(
+          '${Constants.DEBTOR_URL}/${debtor.id}.json',
+        ),
+        body: jsonEncode({
+          "datePay": debtor.datePay.add(Duration(days: 30)).toIso8601String(),
+          "payment": 0,
+        }),
+      );
+    }
   }
 
   Future<void> listDebtors() async {
@@ -35,11 +58,12 @@ class DebtorList with ChangeNotifier {
     final response = await http.get(Uri.parse('${Constants.DEBTOR_URL}.json'));
     if (response.body == 'null') return;
     Map<String, dynamic> data = jsonDecode(response.body);
-    checkDebtorPayments();
+    await checkDebtorPayments();
 
     data.forEach((id, debtorData) {
       _items.add(
         Debtor(
+            id: id,
             payment: Payment.values.elementAt(debtorData['payment']),
             valuePay: debtorData['valuePay'],
             name: debtorData['name'],
@@ -67,8 +91,6 @@ class DebtorList with ChangeNotifier {
   }
 
   void saveData(Map<String, Object> data, DateTime datePay) {
-    print(data['valuePay']);
-
     Payment payment = Payment.ok;
     if (DateTime.now().compareTo(data['datePay'] as DateTime) == -1) {
       payment = Payment.ok;
@@ -87,7 +109,7 @@ class DebtorList with ChangeNotifier {
     addData(debtor);
   }
 
-  Payment checkPayment(debtor) {
+  Payment checkPayment(Debtor debtor) {
     Payment payment = Payment.ok;
     if (DateTime.now().compareTo(debtor.datePay as DateTime) == -1) {
       return payment = Payment.ok;
@@ -112,7 +134,8 @@ class DebtorList with ChangeNotifier {
         },
       ),
     );
-
+    final id = jsonDecode(response.body)['number'];
+    print(id);
     _items.add(
       Debtor(
         valuePay: debtor.valuePay,
@@ -121,6 +144,7 @@ class DebtorList with ChangeNotifier {
         datePay: debtor.datePay,
       ),
     );
+
     notifyListeners();
   }
 }

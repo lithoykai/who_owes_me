@@ -11,6 +11,7 @@ class DebtorGridItem extends StatefulWidget {
 }
 
 class _DebtorGridItemState extends State<DebtorGridItem> {
+  bool _listOptions = false;
   // Debtor debtor;
   @override
   Widget build(BuildContext context) {
@@ -18,35 +19,54 @@ class _DebtorGridItemState extends State<DebtorGridItem> {
       context,
       listen: false,
     );
-    return ListTile(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(5),
-      ),
-      tileColor: debtor.paymentColor!,
-      title: Text(debtor.name),
-      subtitle: Text('${debtor.number} - R\$ ${debtor.valuePay}'),
-      trailing: Column(
-        children: [
-          Text('Pagamento:'),
-          Text(
-            DateFormat('dd/MM/yyyy').format(debtor.datePay),
+    return Column(
+      children: [
+        ListTile(
+          onTap: () {
+            setState(() {
+              _listOptions = !_listOptions;
+            });
+          },
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(5),
           ),
-          // TextButton(
-          //   onPressed: () {
-          //     Provider.of<DebtorList>(context, listen: false).refreshDebtors();
-          //   },
-          //   child: Text('Teste.'),
-          // )
-        ],
-      ),
+          tileColor: debtor.paymentColor!,
+          title: Text(debtor.name),
+          subtitle: Text('${debtor.number} - R\$ ${debtor.valuePay}'),
+          trailing: Column(
+            children: [
+              Text('Pagamento:'),
+              Text(
+                DateFormat('dd/MM/yyyy').format(debtor.datePay),
+              ),
+            ],
+          ),
+        ),
+        _listOptions
+            ? Container(
+                color: debtor.paymentColor,
+                padding: EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      onPressed: () {},
+                      child: Text('Mandar mensagem.'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Provider.of<DebtorList>(context, listen: false)
+                            .paymentDone(debtor)
+                            .then((value) =>
+                                Provider.of<DebtorList>(context, listen: false)
+                                    .listDebtors());
+                      },
+                      child: Text('Realizar pagamento.'),
+                    ),
+                  ],
+                ))
+            : Container(),
+      ],
     );
-    // Container(
-    //   child: Column(
-    //     children: [
-    //       Text(debtor.name),
-    //       Text(debtor.number),
-    //     ],
-    //   ),
-    // );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class Debtor with ChangeNotifier {
+  String? id;
   String name;
   String number;
   String valuePay;
@@ -8,6 +9,7 @@ class Debtor with ChangeNotifier {
   Payment? payment;
 
   Debtor({
+    this.id,
     this.payment,
     required this.valuePay,
     required this.name,
